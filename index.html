@@ -1,1 +1,983 @@
+<!DOCTYPE html>
 
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="酒手帖">
+<title>酒手帖</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+:root {
+  --navy: #0F1B35;
+  --navy-mid: #1E2E52;
+  --blue: #2D4A8A;
+  --blue-light: #4A6BB5;
+  --cream: #F5F0E8;
+  --paper: #EDE5D8;
+  --white: #FAFAF8;
+  --ink: #1A1A2E;
+  --gray: #5A6070;
+  --gray-light: #C8CDD8;
+  --red: #C0392B;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { min-height: 100vh; background: var(--cream); color: var(--ink); font-family: 'DM Sans', sans-serif; max-width: 480px; margin: 0 auto; font-size: 14px; }
+
+/* ===== HEADER ===== */
+header {
+background: var(–navy);
+padding: 16px 24px 16px;
+position: relative;
+overflow: hidden;
+}
+.header-noise {
+position: absolute; inset: 0; opacity: 0.03;
+background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘4’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23n)’/%3E%3C/svg%3E”);
+background-size: 200px;
+}
+.header-inner { position: relative; z-index: 1; }
+.header-top { display: flex; align-items: flex-end; justify-content: space-between; }
+.header-left {}
+.header-eyebrow { font-size: 12px; font-weight: 500; letter-spacing: 0.35em; color: var(–blue-light); margin-bottom: 10px; }
+/* ロゴエリア：画像差し替え可能 */
+#header-logo { margin-bottom: 6px; }
+#header-logo img { height: 56px; width: auto; object-fit: contain; display: block; }
+/* テキストロゴ（画像がない場合のフォールバック） */
+.header-title-text {
+font-family: ‘Shippori Mincho’, serif;
+font-size: 36px; font-weight: 800;
+color: var(–white);
+letter-spacing: 0.08em;
+line-height: 1;
+}
+
+.header-right { text-align: right; padding-bottom: 4px; }
+.header-count-num { font-family: ‘DM Sans’, sans-serif; font-size: 36px; font-weight: 700; color: rgba(255,255,255,0.9); line-height: 1; }
+.header-count-label { font-size: 12px; font-weight: 500; color: var(–blue-light); letter-spacing: 0.2em; margin-top: 2px; }
+.header-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 16px 0 10px; }
+.header-tagline { font-size: 12px; color: rgba(255,255,255,0.25); letter-spacing: 0.25em; font-weight: 500; }
+
+/* ===== TAB ===== */
+.tab-nav { display: flex; background: var(–navy); border-bottom: 1px solid rgba(255,255,255,0.08); padding: 6px 12px; gap: 6px; }
+.tab-btn { flex: 1; padding: 10px 8px; font-size: 13px; font-weight: 600; border: none; background: transparent; cursor: pointer; font-family: inherit; color: rgba(255,255,255,0.35); letter-spacing: 0.05em; transition: all 0.15s; border-radius: 10px; }
+.tab-btn.active { color: var(–white); background: rgba(255,255,255,0.1); }
+
+/* ===== LABEL GRID ===== */
+.grid-wrap { padding: 20px 16px; }
+.label-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.label-card {
+background: var(–white);
+border-radius: 14px;
+overflow: hidden;
+cursor: pointer;
+box-shadow: 0 2px 12px rgba(15,27,53,0.08);
+border: 1px solid rgba(15,27,53,0.06);
+transition: transform 0.15s, box-shadow 0.15s;
+}
+.label-card:active { transform: scale(0.97); box-shadow: 0 1px 6px rgba(15,27,53,0.08); }
+.label-card-photo { width: 100%; aspect-ratio: 3/4; background: var(–paper); overflow: hidden; position: relative; }
+.label-card-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.label-card-no-photo {
+width: 100%; height: 100%;
+display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+background: linear-gradient(160deg, var(–paper), #E0D8C8);
+}
+.label-card-no-photo .sake-icon { font-size: 30px; opacity: 0.7; }
+.label-card-no-photo .sake-type-text { font-family: ‘Shippori Mincho’, serif; font-size: 12px; color: var(–gray); letter-spacing: 0.2em; }
+.label-card-photo-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(–blue); opacity: 0.6; }
+.label-card-body { padding: 14px 14px 16px; }
+.label-card-name { font-family: ‘Shippori Mincho’, serif; font-size: 15px; font-weight: 600; color: var(–ink); line-height: 1.4; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.label-card-footer { display: flex; align-items: center; justify-content: space-between; }
+.label-card-stars { font-size: 12px; color: var(–blue); }
+.label-card-date { font-size: 11px; color: var(–navy-mid); font-weight: 600; white-space: nowrap; }
+
+/* ===== LIST ===== */
+.list-wrap { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.list-card {
+background: var(–white);
+border-radius: 12px;
+padding: 14px 16px;
+display: flex; align-items: center; gap: 14px;
+cursor: pointer;
+box-shadow: 0 2px 10px rgba(15,27,53,0.06);
+border: 1px solid rgba(15,27,53,0.05);
+transition: transform 0.1s;
+position: relative; overflow: hidden;
+}
+.list-card::before { content: ‘’; position: absolute; left: 0; top: 12px; bottom: 12px; width: 2px; background: var(–blue-light); border-radius: 2px; }
+.list-card:active { transform: scale(0.99); }
+.list-thumb { width: 50px; height: 50px; border-radius: 8px; border: 1px solid rgba(15,27,53,0.08); overflow: hidden; flex-shrink: 0; background: var(–paper); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.list-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.list-info { flex: 1; min-width: 0; }
+.list-name { font-family: ‘Shippori Mincho’, serif; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.list-meta { font-size: 12px; color: var(–gray); margin-top: 3px; }
+.list-right { text-align: right; flex-shrink: 0; min-width: 72px; max-width: 72px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; padding-right: 0; }
+.list-stars { font-size: 0px; color: var(–blue); display: flex; gap: 2px; }
+.list-date { font-size: 11px; color: var(–navy-mid); font-weight: 600; margin-top: 4px; white-space: nowrap; }
+
+/* ===== CALENDAR ===== */
+.cal-wrap { padding: 20px 16px; }
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.cal-title { font-family: ‘Shippori Mincho’, serif; font-size: 18px; font-weight: 600; color: var(–ink); letter-spacing: 0.1em; }
+.cal-nav { background: var(–navy); color: var(–white); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; }
+.cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+.cal-day-label { text-align: center; font-size: 12px; font-weight: 500; color: var(–gray); padding: 5px 0; }
+.cal-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; border-radius: 8px; cursor: pointer; position: relative; transition: background 0.1s; color: var(–ink); }
+.cal-cell.has-record { background: var(–blue); color: #fff; }
+.cal-cell.has-record::after { content: ‘🍶’; position: absolute; bottom: 0; right: 0; font-size: 7px; }
+.cal-cell.today { border: 1.5px solid var(–blue-light); }
+.cal-cell.other-month { color: var(–gray-light); }
+.cal-records { margin-top: 20px; }
+.cal-records-title { font-family: ‘Shippori Mincho’, serif; font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(–ink); }
+
+/* ===== EMPTY ===== */
+.empty { text-align: center; padding: 64px 24px; }
+.empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+.empty-text { font-family: ‘Shippori Mincho’, serif; font-size: 14px; color: var(–gray); line-height: 2; }
+
+/* ===== STAMP ANIMATION ===== */
+.stamp-overlay { position: fixed; inset: 0; z-index: 999; display: flex; align-items: center; justify-content: center; background: rgba(15,27,53,0.75); animation: fadeInOut 1.8s forwards; }
+.stamp-anim { width: 180px; height: 180px; border-radius: 50%; border: 6px solid var(–red); display: flex; align-items: center; justify-content: center; flex-direction: column; background: rgba(192,57,43,0.1); animation: stampIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; position: relative; }
+.stamp-anim::before { content: ‘’; position: absolute; inset: -12px; border-radius: 50%; border: 3px dashed rgba(192,57,43,0.5); }
+.stamp-anim-text { font-family: ‘DM Sans’, sans-serif; font-size: 22px; font-weight: 700; color: var(–red); letter-spacing: 0.1em; line-height: 1.2; text-align: center; }
+.stamp-anim-sub { font-family: ‘Shippori Mincho’, serif; font-size: 12px; color: var(–red); margin-top: 6px; opacity: 0.8; }
+@keyframes stampIn { 0% { transform: scale(2.5) rotate(-15deg); opacity: 0; } 100% { transform: scale(1) rotate(-8deg); opacity: 1; } }
+@keyframes fadeInOut { 0% { opacity: 0; } 15% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ===== DETAIL ===== */
+.page { padding: 20px 16px; padding-bottom: 80px; }
+.back-btn { display: inline-flex; align-items: center; gap: 6px; background: var(–navy); border: none; color: var(–white); cursor: pointer; font-size: 12px; font-weight: 500; padding: 8px 16px; border-radius: 20px; margin-bottom: 20px; font-family: inherit; letter-spacing: 0.08em; }
+.detail-photo { width: 100%; aspect-ratio: 3/4; max-height: 300px; border-radius: 14px; margin-bottom: 20px; background: var(–paper); display: flex; align-items: center; justify-content: center; font-size: 56px; overflow: hidden; box-shadow: 0 8px 32px rgba(15,27,53,0.12); }
+.detail-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.detail-card { background: var(–white); border-radius: 16px; padding: 22px; box-shadow: 0 4px 20px rgba(15,27,53,0.06); border: 1px solid rgba(15,27,53,0.05); }
+.detail-type-badge { display: inline-block; background: var(–navy); color: var(–white); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 10px; letter-spacing: 0.1em; }
+.detail-name { font-family: ‘Shippori Mincho’, serif; font-size: 24px; font-weight: 800; margin-bottom: 4px; line-height: 1.3; color: var(–ink); }
+.detail-brewery { font-family: ‘Shippori Mincho’, serif; font-size: 16px; font-weight: 600; color: var(–navy-mid); margin-bottom: 4px; letter-spacing: 0.05em; }
+.detail-date { font-size: 12px; color: var(–navy-mid); margin-bottom: 20px; font-weight: 500; }
+.detail-divider { height: 1px; background: rgba(15,27,53,0.06); margin: 16px 0; }
+.radar-wrap { margin: 16px 0; text-align: center; }
+.radar-title { font-size: 12px; font-weight: 700; color: var(–gray); letter-spacing: 0.2em; margin-bottom: 14px; }
+.radar-svg { width: 170px; height: 170px; }
+.ratings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.rating-cell { background: var(–cream); border-radius: 10px; padding: 12px 8px; text-align: center; border: 1px solid rgba(15,27,53,0.05); }
+.rating-label { font-size: 12px; font-weight: 500; color: var(–gray); margin-bottom: 6px; }
+.rating-stars { font-size: 13px; color: var(–blue); }
+.rating-sub { font-size: 12px; font-weight: 700; color: var(–navy-mid); margin-top: 4px; }
+.memo-section { background: var(–cream); border-radius: 10px; padding: 16px; border: 1px solid rgba(15,27,53,0.05); }
+.memo-label { font-size: 12px; font-weight: 700; color: var(–gray); margin-bottom: 8px; letter-spacing: 0.2em; }
+.memo-text { font-family: ‘Shippori Mincho’, serif; font-size: 14px; line-height: 2; color: var(–ink); }
+.delete-btn { margin-top: 16px; background: none; border: 1px solid rgba(192,57,43,0.3); color: var(–red); padding: 12px; cursor: pointer; font-size: 12px; font-weight: 500; border-radius: 10px; width: 100%; font-family: inherit; letter-spacing: 0.1em; }
+.edit-btn { flex: 1; background: var(–navy); border: none; color: var(–white); padding: 12px; cursor: pointer; font-size: 12px; font-weight: 600; border-radius: 10px; font-family: inherit; letter-spacing: 0.1em; }
+
+/* ===== FORM ===== */
+.form-wrap { padding: 20px 16px; padding-bottom: 80px; }
+.form-header { padding: 8px 0 24px; border-bottom: 1px solid rgba(15,27,53,0.08); margin-bottom: 24px; }
+.form-title-en { font-family: ‘DM Sans’, sans-serif; font-size: 32px; font-weight: 700; color: var(–navy); letter-spacing: 0.02em; line-height: 1; }
+.form-title-ja { font-family: ‘Shippori Mincho’, serif; font-size: 12px; color: var(–gray); letter-spacing: 0.25em; margin-top: 6px; }
+.field { margin-bottom: 20px; }
+.field-label { font-size: 13px; font-weight: 700; color: var(–navy-mid); letter-spacing: 0.1em; margin-bottom: 8px; display: block; }
+input[type=text], input[type=date], textarea {
+width: 100%; background: var(–white);
+border: 1.5px solid rgba(15,27,53,0.12); color: var(–ink);
+padding: 15px 16px; font-size: 16px; border-radius: 12px;
+outline: none; font-family: inherit; min-height: 56px;
+transition: border-color 0.15s, box-shadow 0.15s;
+}
+input[type=date] {
+min-height: 60px;
+font-size: 17px;
+padding: 16px;
+cursor: pointer;
+}
+input:focus, textarea:focus { border-color: var(–blue-light); box-shadow: 0 0 0 3px rgba(74,107,181,0.1); }
+textarea { resize: vertical; min-height: 80px; font-family: ‘DM Sans’, sans-serif; font-size: 16px; }
+input::placeholder, textarea::placeholder { color: var(–gray-light); }
+.type-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.type-btn { padding: 7px 14px; font-size: 11px; font-weight: 500; background: var(–white); border: 1.5px solid rgba(15,27,53,0.12); color: var(–gray); border-radius: 20px; cursor: pointer; font-family: inherit; transition: all 0.15s; letter-spacing: 0.05em; }
+.type-btn.active { background: var(–navy); border-color: transparent; color: var(–white); }
+.star-row { display: flex; gap: 6px; }
+.star-btn {
+flex: 1; height: 58px;
+background: var(–cream);
+border: 1.5px solid rgba(15,27,53,0.08);
+border-radius: 12px;
+cursor: pointer;
+font-family: inherit;
+transition: all 0.12s;
+display: flex; align-items: center; justify-content: center;
+padding: 6px 0;
+}
+.star-btn.on {
+background: rgba(45,74,138,0.08);
+border-color: var(–blue-light);
+}
+.star-btn:active { transform: scale(0.96); }
+.star-btn svg { pointer-events: none; }
+.photo-upload { width: 100%; aspect-ratio: 3/4; max-height: 220px; border: 1.5px dashed rgba(15,27,53,0.15); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; cursor: pointer; background: var(–white); position: relative; overflow: hidden; }
+.photo-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.photo-upload-icon { font-size: 28px; opacity: 0.4; }
+.photo-upload-text { font-size: 11px; font-weight: 500; color: var(–gray); letter-spacing: 0.1em; }
+.photo-preview { width: 100%; aspect-ratio: 3/4; max-height: 220px; object-fit: cover; border: 1.5px solid rgba(15,27,53,0.1); border-radius: 10px; display: block; }
+.submit-btn { background: var(–navy); border: none; color: var(–white); padding: 17px; font-size: 15px; font-weight: 700; letter-spacing: 0.15em; border-radius: 12px; cursor: pointer; font-family: ‘DM Sans’, sans-serif; width: 100%; box-shadow: 0 4px 16px rgba(15,27,53,0.2); transition: all 0.15s; }
+.submit-btn:active { transform: scale(0.98); opacity: 0.9; }
+.submit-btn:disabled { background: var(–gray-light); box-shadow: none; cursor: not-allowed; color: rgba(255,255,255,0.6); }
+
+/* ===== FAB ===== */
+#fab { position: fixed; bottom: 24px; right: 20px; width: 58px; height: 58px; background: var(–navy); border: none; color: var(–white); font-size: 26px; font-weight: 700; cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 24px rgba(15,27,53,0.3); z-index: 100; transition: transform 0.15s; }
+#fab:active { transform: scale(0.93); }
+
+/* ===== 記入者管理画面 ===== */
+.settings-wrap { padding: 20px 16px; padding-bottom: 80px; }
+.settings-section { margin-bottom: 28px; }
+.settings-title { font-family: ‘DM Sans’, sans-serif; font-size: 11px; font-weight: 700; color: var(–gray); letter-spacing: 0.25em; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid rgba(15,27,53,0.08); }
+.member-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.member-item { display: flex; align-items: center; justify-content: space-between; background: var(–white); border: 1px solid rgba(15,27,53,0.08); border-radius: 10px; padding: 12px 14px; }
+.member-name { font-family: ‘Shippori Mincho’, serif; font-size: 15px; font-weight: 600; }
+.member-delete { background: none; border: none; color: var(–gray); font-size: 18px; cursor: pointer; padding: 0 4px; line-height: 1; }
+.member-add-row { display: flex; gap: 10px; }
+.member-add-input { flex: 1; background: var(–white); border: 1.5px solid rgba(15,27,53,0.12); color: var(–ink); padding: 11px 14px; font-size: 15px; border-radius: 10px; outline: none; font-family: inherit; }
+.member-add-input:focus { border-color: var(–blue-light); }
+.member-add-btn { background: var(–navy); border: none; color: var(–white); padding: 11px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
+
+/* ===== 酒造検索 ===== */
+.brewery-search-wrap { position: relative; }
+.brewery-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(–white); border: 1.5px solid var(–blue-light); border-radius: 10px; max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 8px 24px rgba(15,27,53,0.12); margin-top: 4px; }
+.brewery-option { padding: 11px 14px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 14px; border-bottom: 1px solid rgba(15,27,53,0.04); }
+.brewery-option:last-child { border-bottom: none; }
+.brewery-option:active { background: var(–cream); }
+.brewery-option-name { font-family: ‘Shippori Mincho’, serif; font-weight: 600; }
+.brewery-option-pref { font-size: 12px; color: var(–gray); background: var(–cream); padding: 2px 8px; border-radius: 10px; }
+
+/* ===== 都道府県タグ ===== */
+.pref-tag { display: inline-block; font-size: 12px; font-weight: 500; color: var(–blue); background: rgba(45,74,138,0.08); padding: 2px 8px; border-radius: 10px; margin-bottom: 6px; }
+
+/* ===== 記入者セレクト ===== */
+.member-select-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.member-select-btn { padding: 7px 14px; font-size: 11px; font-weight: 500; background: var(–white); border: 1.5px solid rgba(15,27,53,0.12); color: var(–gray); border-radius: 20px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.member-select-btn.active { background: var(–navy); border-color: transparent; color: var(–white); }
+
+/* ===== ヘッダー設定アイコン ===== */
+
+/* ===== 詳細ページ メタ情報 ===== */
+.detail-meta-row {
+display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+margin: 8px 0 6px;
+}
+.detail-pref-tag {
+font-size: 12px; font-weight: 600;
+color: var(–blue); background: rgba(45,74,138,0.08);
+padding: 3px 10px; border-radius: 10px;
+}
+.detail-type-inline {
+font-size: 12px; font-weight: 600;
+color: var(–white); background: var(–navy);
+padding: 3px 10px; border-radius: 10px;
+}
+.detail-date-inline {
+font-size: 12px; font-weight: 500; color: var(–navy-mid);
+}
+.detail-place-inline {
+font-size: 12px; font-weight: 500; color: var(–gray);
+}
+.detail-writers {
+font-size: 12px; font-weight: 600;
+color: var(–ink);
+margin-bottom: 12px;
+padding: 8px 12px;
+background: var(–cream);
+border-radius: 8px;
+border-left: 3px solid var(–blue-light);
+}
+.detail-rating-row {
+display: flex; align-items: center; gap: 10px;
+margin: 12px 0 4px;
+padding: 12px 14px;
+background: var(–cream);
+border-radius: 10px;
+}
+.detail-rating-stars { font-size: 20px; color: var(–blue); }
+.detail-rating-num { font-size: 14px; font-weight: 700; color: var(–navy); }
+
+/* ===== 詳細ページ 情報レイアウト ===== */
+.detail-tags-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+.detail-info-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 6px 0; }
+.detail-place-block, .detail-writers-inline { display: flex; align-items: center; gap: 6px; }
+.detail-info-icon { font-size: 14px; }
+.detail-info-text { font-size: 13px; font-weight: 500; color: var(–ink); }
+.detail-writers-inline .detail-info-text { font-weight: 600; }
+
+.detail-brewery-row {
+display: flex; align-items: center; gap: 8px;
+margin: 4px 0 8px;
+}
+.detail-brewery-name {
+font-family: ‘Shippori Mincho’, serif;
+font-size: 16px; font-weight: 600;
+color: var(–navy-mid);
+}
+.detail-brewery-sep {
+color: var(–gray-light);
+font-size: 14px;
+font-weight: 300;
+}
+.detail-brewery-pref {
+font-size: 14px; font-weight: 500;
+color: var(–gray);
+}
+
+.label-card-meta {
+font-size: 11px; color: var(–gray);
+margin-bottom: 6px;
+white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.label-card-sep { color: var(–gray-light); margin: 0 2px; }
+
+.required-badge {
+display: inline-block;
+font-size: 10px; font-weight: 700;
+color: var(–white);
+background: var(–blue);
+padding: 1px 7px;
+border-radius: 4px;
+margin-left: 8px;
+letter-spacing: 0.05em;
+vertical-align: middle;
+}
+
+.scale-labels {
+display: flex;
+justify-content: space-between;
+font-size: 11px;
+color: var(–gray);
+font-weight: 500;
+margin-bottom: 6px;
+padding: 0 2px;
+}
+
+.label-card-photo-tag {
+position: absolute;
+top: 8px; left: 8px;
+background: rgba(15,27,53,0.72);
+color: #fff;
+font-size: 10px; font-weight: 700;
+padding: 3px 8px;
+border-radius: 6px;
+letter-spacing: 0.05em;
+backdrop-filter: blur(4px);
+-webkit-backdrop-filter: blur(4px);
+pointer-events: none;
+}
+
+.header-eyebrow-text {
+font-size: 10px; font-weight: 500;
+letter-spacing: 0.35em;
+color: var(–blue-light);
+margin-bottom: 4px;
+}
+.header-count-block { text-align: right; }
+
+.snackbar {
+position: fixed;
+bottom: 24px;
+left: 16px; right: 16px;
+transform: translateY(80px);
+background: #323232;
+color: #fff;
+font-size: 14px;
+font-weight: 400;
+font-family: ‘DM Sans’, sans-serif;
+padding: 14px 16px;
+border-radius: 4px;
+box-shadow: 0 3px 5px rgba(0,0,0,0.2), 0 6px 10px rgba(0,0,0,0.14), 0 1px 18px rgba(0,0,0,0.12);
+z-index: 9999;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.2s cubic-bezier(0,0,0.2,1), transform 0.2s cubic-bezier(0,0,0.2,1);
+letter-spacing: 0.01em;
+display: flex; align-items: center; justify-content: space-between;
+max-width: 448px; margin: 0 auto;
+}
+.snackbar.show {
+opacity: 1;
+transform: translateY(0);
+}
+.snackbar.show { opacity: 1; }
+</style>
+
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="header-noise"></div>
+    <div class="header-inner">
+      <div class="header-top">
+        <!-- 左：ロゴ -->
+        <div class="header-left">
+          <div id="header-logo">
+            <div class="header-eyebrow-text">MY SAKE JOURNAL</div>
+            <div class="header-title-text">酒手帖</div>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="header-count-block">
+            <div class="header-count-num" id="count-num">0</div>
+            <div class="header-count-label">本の記録</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="tab-nav" id="tab-nav">
+    <button class="tab-btn active" id="tab-grid" onclick="switchTab('grid')">ラベル</button>
+    <button class="tab-btn" id="tab-list" onclick="switchTab('list')">リスト</button>
+    <button class="tab-btn" id="tab-cal" onclick="switchTab('cal')">カレンダー</button>
+  </div>
+  <div id="view-main"></div>
+  <div id="view-settings" style="display:none"></div>
+  <div id="view-detail" style="display:none"></div>
+  <div id="view-form" style="display:none"></div>
+</div>
+<button id="fab" onclick="showForm()">＋</button>
+
+<script>
+const BREWERIES = [
+  {name:"男山",pref:"北海道"},{name:"国稀",pref:"北海道"},{name:"二世古",pref:"北海道"},{name:"北の勝",pref:"北海道"},
+  {name:"田酒",pref:"青森"},{name:"豊盃",pref:"青森"},{name:"陸奥八仙",pref:"青森"},{name:"鳩正宗",pref:"青森"},
+  {name:"南部美人",pref:"岩手"},{name:"あさ開",pref:"岩手"},{name:"月の輪",pref:"岩手"},{name:"酔仙",pref:"岩手"},
+  {name:"一ノ蔵",pref:"宮城"},{name:"浦霞",pref:"宮城"},{name:"伯楽星",pref:"宮城"},{name:"綿屋",pref:"宮城"},{name:"墨廼江",pref:"宮城"},
+  {name:"新政",pref:"秋田"},{name:"秀よし",pref:"秋田"},{name:"刈穂",pref:"秋田"},{name:"まんさくの花",pref:"秋田"},{name:"天の戸",pref:"秋田"},{name:"雪の茅舎",pref:"秋田"},
+  {name:"出羽桜",pref:"山形"},{name:"十四代",pref:"山形"},{name:"山形正宗",pref:"山形"},{name:"くどき上手",pref:"山形"},{name:"東光",pref:"山形"},{name:"初孫",pref:"山形"},{name:"楯野川",pref:"山形"},
+  {name:"写楽",pref:"福島"},{name:"飛露喜",pref:"福島"},{name:"廣戸川",pref:"福島"},{name:"奈良萬",pref:"福島"},{name:"会津中将",pref:"福島"},{name:"末廣",pref:"福島"},
+  {name:"来福",pref:"茨城"},{name:"月の井",pref:"茨城"},{name:"武勇",pref:"茨城"},{name:"府中誉",pref:"茨城"},
+  {name:"仙禽",pref:"栃木"},{name:"鳳凰美田",pref:"栃木"},{name:"辻善兵衛",pref:"栃木"},{name:"惣誉",pref:"栃木"},
+  {name:"水芭蕉",pref:"群馬"},{name:"聖",pref:"群馬"},{name:"町田酒造",pref:"群馬"},{name:"赤城山",pref:"群馬"},
+  {name:"神亀",pref:"埼玉"},{name:"帝松",pref:"埼玉"},{name:"晴雲",pref:"埼玉"},{name:"文楽",pref:"埼玉"},
+  {name:"岩の井",pref:"千葉"},{name:"木戸泉",pref:"千葉"},{name:"甲子",pref:"千葉"},
+  {name:"澤乃井",pref:"東京"},{name:"喜正",pref:"東京"},{name:"多満自慢",pref:"東京"},{name:"嘉泉",pref:"東京"},
+  {name:"いずみ橋",pref:"神奈川"},{name:"天青",pref:"神奈川"},{name:"相模灘",pref:"神奈川"},
+  {name:"久保田",pref:"新潟"},{name:"八海山",pref:"新潟"},{name:"越乃寒梅",pref:"新潟"},{name:"鶴齢",pref:"新潟"},{name:"上善如水",pref:"新潟"},{name:"緑川",pref:"新潟"},{name:"〆張鶴",pref:"新潟"},{name:"雪中梅",pref:"新潟"},
+  {name:"立山",pref:"富山"},{name:"羽根屋",pref:"富山"},{name:"富美菊",pref:"富山"},{name:"勝駒",pref:"富山"},
+  {name:"手取川",pref:"石川"},{name:"菊姫",pref:"石川"},{name:"加賀鳶",pref:"石川"},{name:"天狗舞",pref:"石川"},{name:"宗玄",pref:"石川"},
+  {name:"黒龍",pref:"福井"},{name:"梵",pref:"福井"},{name:"一本義",pref:"福井"},{name:"花垣",pref:"福井"},
+  {name:"七賢",pref:"山梨"},{name:"谷桜",pref:"山梨"},{name:"春鶯囀",pref:"山梨"},
+  {name:"真澄",pref:"長野"},{name:"大信州",pref:"長野"},{name:"明鏡止水",pref:"長野"},{name:"佐久乃花",pref:"長野"},{name:"亀齢",pref:"長野"},{name:"澤の花",pref:"長野"},
+  {name:"三千盛",pref:"岐阜"},{name:"房島屋",pref:"岐阜"},{name:"小左衛門",pref:"岐阜"},
+  {name:"磯自慢",pref:"静岡"},{name:"開運",pref:"静岡"},{name:"正雪",pref:"静岡"},{name:"白隠正宗",pref:"静岡"},{name:"臥龍梅",pref:"静岡"},
+  {name:"蓬莱泉",pref:"愛知"},{name:"醸し人九平次",pref:"愛知"},{name:"義侠",pref:"愛知"},{name:"二兎",pref:"愛知"},
+  {name:"而今",pref:"三重"},{name:"作",pref:"三重"},{name:"半蔵",pref:"三重"},
+  {name:"七本鎗",pref:"滋賀"},{name:"喜楽長",pref:"滋賀"},{name:"浪乃音",pref:"滋賀"},
+  {name:"玉乃光",pref:"京都"},{name:"招德",pref:"京都"},{name:"澤屋まつもと",pref:"京都"},{name:"松本酒造",pref:"京都"},
+  {name:"秋鹿",pref:"大阪"},{name:"浪花正宗",pref:"大阪"},
+  {name:"剣菱",pref:"兵庫"},{name:"白鶴",pref:"兵庫"},{name:"菊正宗",pref:"兵庫"},{name:"大関",pref:"兵庫"},{name:"竹泉",pref:"兵庫"},{name:"奥播磨",pref:"兵庫"},{name:"仙介",pref:"兵庫"},
+  {name:"春鹿",pref:"奈良"},{name:"梅乃宿",pref:"奈良"},{name:"風の森",pref:"奈良"},{name:"三諸杉",pref:"奈良"},
+  {name:"黒牛",pref:"和歌山"},{name:"車坂",pref:"和歌山"},
+  {name:"千代むすび",pref:"鳥取"},{name:"日置桜",pref:"鳥取"},{name:"辨天娘",pref:"鳥取"},
+  {name:"王禄",pref:"島根"},{name:"死神",pref:"島根"},{name:"開春",pref:"島根"},
+  {name:"嘉美心",pref:"岡山"},{name:"大正の鶴",pref:"岡山"},
+  {name:"賀茂鶴",pref:"広島"},{name:"西条鶴",pref:"広島"},{name:"富久長",pref:"広島"},{name:"龍勢",pref:"広島"},
+  {name:"獺祭",pref:"山口"},{name:"東洋美人",pref:"山口"},{name:"雁木",pref:"山口"},{name:"貴",pref:"山口"},
+  {name:"鳴門鯛",pref:"徳島"},{name:"芳水",pref:"徳島"},
+  {name:"川鶴",pref:"香川"},{name:"悦凱陣",pref:"香川"},{name:"金陵",pref:"香川"},
+  {name:"石鎚",pref:"愛媛"},{name:"梅錦",pref:"愛媛"},
+  {name:"土佐鶴",pref:"高知"},{name:"司牡丹",pref:"高知"},{name:"酔鯨",pref:"高知"},{name:"文佳人",pref:"高知"},
+  {name:"三井の寿",pref:"福岡"},{name:"田中六五",pref:"福岡"},{name:"繁枡",pref:"福岡"},{name:"庭のうぐいす",pref:"福岡"},
+  {name:"鍋島",pref:"佐賀"},{name:"七田",pref:"佐賀"},{name:"東一",pref:"佐賀"},{name:"能古見",pref:"佐賀"},
+  {name:"福田",pref:"長崎"},{name:"六十餘洲",pref:"長崎"},
+  {name:"香露",pref:"熊本"},{name:"瑞鷹",pref:"熊本"},{name:"美少年",pref:"熊本"},
+  {name:"西の関",pref:"大分"},{name:"ちえびじん",pref:"大分"},{name:"鷹来屋",pref:"大分"},
+  {name:"千徳",pref:"宮崎"},{name:"高千穂",pref:"宮崎"},
+  {name:"薩州正宗",pref:"鹿児島"},{name:"さつま寿",pref:"鹿児島"},
+  {name:"瑞泉",pref:"沖縄"},{name:"菊之露",pref:"沖縄"},
+];
+const SAKE_TYPES = ["純米","吟醸","大吟醸","純米吟醸","純米大吟醸","本醸造","生酒","にごり酒","古酒"];
+const DAYS = ["日","月","火","水","木","金","土"];
+function loadMembers() { try { const d = localStorage.getItem('sake_members'); return d ? JSON.parse(d) : []; } catch(e) { return []; } }
+function saveMembers(m) { try { localStorage.setItem('sake_members', JSON.stringify(m)); } catch(e) {} }
+let members = loadMembers();
+function loadRecords() { try { const d = localStorage.getItem('sake_records'); return d ? JSON.parse(d) : []; } catch(e) { return []; } }
+function saveRecords(r) { try { localStorage.setItem('sake_records', JSON.stringify(r)); } catch(e) {} }
+let records = loadRecords();
+let currentView = 'main', currentTab = 'grid', selectedId = null;
+let form = freshForm(), calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+let photoData = null, selectedCalDate = null, editingId = null, prevView = null;
+let breweryQuery = '', showBreweryDropdown = false;
+
+function tokkuriSVG(filled) {
+  const color = filled ? 'var(--blue)' : 'rgba(15,27,53,0.15)';
+  return `<span class="material-icons" style="font-size:20px;color:${color};transition:color 0.12s;line-height:1;">water_drop</span>`;
+}
+
+function tokkuriRating(n, total=5, size=20) {
+  let out = '<span style="display:inline-flex;gap:0px;align-items:center;">';
+  for (let i = 1; i <= total; i++) {
+    const color = i <= n ? 'var(--blue)' : 'rgba(15,27,53,0.15)';
+    out += `<span class="material-icons" style="font-size:${size}px;color:${color};transition:color 0.12s;line-height:1;">water_drop</span>`;
+  }
+  out += '</span>';
+  return out;
+}
+function freshForm() { return { name:'', brewery:'', brewerySel:'', pref:'', type:'', date: today(), sweetness:3, floral:3, crisp:3, rich:3, acid:3, rating:3, memo:'', photo:'', writers:[], place:'' }; }
+function today() { return new Date().toISOString().slice(0,10); }
+function stars(n, t=5) { return '★'.repeat(n)+'☆'.repeat(t-n); }
+function esc(s) { if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function render() {
+  const num = document.getElementById('count-num');
+  if (num) num.textContent = records.length;
+  const fab = document.getElementById('fab');
+  if (fab) fab.style.display = currentView === 'main' ? 'flex' : 'none';
+  const tabNav = document.getElementById('tab-nav');
+  if (tabNav) tabNav.style.display = currentView === 'main' ? 'flex' : 'none';
+  document.getElementById('view-main').style.display = currentView === 'main' ? 'block' : 'none';
+  document.getElementById('view-detail').style.display = currentView === 'detail' ? 'block' : 'none';
+  document.getElementById('view-form').style.display = currentView === 'form' ? 'block' : 'none';
+  document.getElementById('view-settings').style.display = currentView === 'settings' ? 'block' : 'none';
+  if (currentView === 'main') renderMain();
+  if (currentView === 'detail') renderDetail();
+  if (currentView === 'form') renderForm();
+  if (currentView === 'settings') renderSettings();
+}
+function switchTab(tab) {
+  currentTab = tab;
+  ['grid','list','cal'].forEach(t => document.getElementById('tab-'+t).classList.toggle('active', t===tab));
+  renderMain();
+}
+function renderMain() {
+  if (currentTab === 'grid') renderGrid();
+  else if (currentTab === 'list') renderListView();
+  else renderCalendar();
+}
+function renderGrid() {
+  const el = document.getElementById('view-main');
+  if (records.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🍶</div><div class="empty-text">まだ記録がありません<br>＋から最初の一本を記録しよう</div></div>';
+    return;
+  }
+  el.innerHTML = '<div class="grid-wrap"><div class="label-grid">' +
+    records.map(r => `
+      <div class="label-card" onclick="showDetail(${r.id})">
+        <div class="label-card-photo">
+          ${r.photo ? `<img src="${r.photo}">` : `<div class="label-card-no-photo"><span class="sake-icon">🍶</span></div>`}
+          ${r.type ? `<div class="label-card-photo-tag">${esc(r.type)}</div>` : ''}
+          <div class="label-card-photo-bar"></div>
+        </div>
+
+        <div class="label-card-body">
+          <div class="label-card-name">${esc(r.name)}</div>
+          <div class="label-card-meta">${esc(r.brewery)}${r.pref ? '<span class="label-card-sep"> | </span>' + esc(r.pref) : ''}</div>
+          <div class="label-card-footer">
+            <div class="label-card-stars">${tokkuriRating(r.rating)}</div>
+            <div class="label-card-date">${r.date.slice(5)}</div>
+          </div>
+        </div>
+      </div>
+    `).join('') + '</div></div>';
+}
+function renderListView() {
+  const el = document.getElementById('view-main');
+  if (records.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🍶</div><div class="empty-text">まだ記録がありません</div></div>';
+    return;
+  }
+  el.innerHTML = '<div class="list-wrap">' +
+    records.map(r => `
+      <div class="list-card" onclick="showDetail(${r.id})">
+        <div class="list-thumb">${r.photo ? `<img src="${r.photo}">` : '🍶'}</div>
+        <div class="list-info">
+          <div class="list-name">${esc(r.name)}</div>
+          <div class="list-meta">${esc(r.brewery)}${r.pref ? ` <span style="color:var(--gray-light);margin:0 4px;">|</span> ${esc(r.pref)}` : ''}</div>
+        </div>
+        <div class="list-right">
+          <div class="list-stars">${tokkuriRating(r.rating, 5, 14)}</div>
+          <div class="list-date">${r.date.slice(5)}</div>
+        </div>
+      </div>
+    `).join('') + '</div>';
+}
+function renderCalendar() {
+  const el = document.getElementById('view-main');
+  const year = calYear, month = calMonth;
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const todayStr = today();
+  const recordDates = {};
+  records.forEach(r => { if (!recordDates[r.date]) recordDates[r.date]=[]; recordDates[r.date].push(r); });
+  let cells = '';
+  DAYS.forEach(d => { cells += `<div class="cal-day-label">${d}</div>`; });
+  for (let i=0; i<firstDay; i++) cells += '<div class="cal-cell other-month"></div>';
+  for (let d=1; d<=daysInMonth; d++) {
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    cells += `<div class="cal-cell${recordDates[ds]?' has-record':''}${ds===todayStr?' today':''}" onclick="calDayClick('${ds}')">${d}</div>`;
+  }
+  const selRecs = selectedCalDate ? (recordDates[selectedCalDate]||[]) : [];
+  const selHtml = selectedCalDate && selRecs.length > 0
+    ? `<div class="cal-records"><div class="cal-records-title">${selectedCalDate} の記録</div>` +
+      selRecs.map(r => `<div class="list-card" onclick="showDetail(${r.id})"><div class="list-thumb">${r.photo?`<img src="${r.photo}">`:'🍶'}</div><div class="list-info"><div class="list-name">${esc(r.name)}</div><div class="list-meta">${esc(r.brewery)}</div></div><div class="list-right"><div class="list-stars">${tokkuriRating(r.rating, 5, 14)}</div></div></div>`).join('') + '</div>'
+    : '';
+  el.innerHTML = `<div class="cal-wrap"><div class="cal-header"><button class="cal-nav" onclick="calMove(-1)">‹</button><div class="cal-title">${year}年${month+1}月</div><button class="cal-nav" onclick="calMove(1)">›</button></div><div class="cal-grid">${cells}</div>${selHtml}</div>`;
+}
+function calDayClick(ds) { selectedCalDate = ds; renderCalendar(); }
+function calMove(dir) {
+  calMonth += dir;
+  if (calMonth < 0) { calMonth=11; calYear--; }
+  if (calMonth > 11) { calMonth=0; calYear++; }
+  selectedCalDate = null;
+  renderCalendar();
+}
+function drawRadar(r) {
+  const size = 160, cx = size/2, cy = size/2, R = 55;
+  const labels = ['甘味','華やかさ','キレ','芳醇さ','酸味'];
+  const values = [r.sweetness||3, r.floral||3, r.crisp||3, r.rich||3, r.acid||3];
+  const angles = labels.map((_,i) => (Math.PI*2*i/labels.length) - Math.PI/2);
+  const toXY = (val, i) => ({ x: cx + R*(val/5)*Math.cos(angles[i]), y: cy + R*(val/5)*Math.sin(angles[i]) });
+  let gridLines = '';
+  for (let g=1; g<=5; g++) {
+    const pts = angles.map((_,i) => { const rr = g/5; return `${cx+R*rr*Math.cos(angles[i])},${cy+R*rr*Math.sin(angles[i])}`; }).join(' ');
+    gridLines += `<polygon points="${pts}" fill="none" stroke="rgba(15,27,53,0.08)" stroke-width="1"/>`;
+  }
+  const axes = angles.map((a) => `<line x1="${cx}" y1="${cy}" x2="${cx+R*Math.cos(a)}" y2="${cy+R*Math.sin(a)}" stroke="rgba(15,27,53,0.08)" stroke-width="1"/>`).join('');
+  const pts = values.map((v,i) => { const p = toXY(v,i); return `${p.x},${p.y}`; }).join(' ');
+  const dataPath = `<polygon points="${pts}" fill="rgba(45,74,138,0.15)" stroke="rgba(45,74,138,0.7)" stroke-width="1.5"/>`;
+  const labelEls = labels.map((l,i) => {
+    const x = cx + (R+16)*Math.cos(angles[i]);
+    const y = cy + (R+16)*Math.sin(angles[i]);
+    return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" font-size="9" fill="#8A8FA0" font-weight="500" font-family="sans-serif">${l}</text>`;
+  }).join('');
+  return `<svg class="radar-svg" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">${gridLines}${axes}${dataPath}${labelEls}</svg>`;
+}
+function renderDetail() {
+  const r = records.find(r => r.id === selectedId);
+  if (!r) { showMain(); return; }
+  document.getElementById('view-detail').innerHTML = `
+    <div class="page">
+      <button class="back-btn" onclick="showMain()">← 戻る</button>
+      <div class="detail-photo">${r.photo ? `<img src="${r.photo}">` : '🍶'}</div>
+      <div class="detail-card">
+
+        <!-- 1. 銘柄名 -->
+        <div class="detail-name">${esc(r.name)}</div>
+
+        <!-- 2. 酒造名 + 都道府県 横並び -->
+        <div class="detail-brewery-row">
+          ${r.brewery ? `<span class="detail-brewery-name">${esc(r.brewery)}</span>` : ''}
+          ${r.brewery && r.pref ? `<span class="detail-brewery-sep">|</span>` : ''}
+          ${r.pref ? `<span class="detail-brewery-pref">${esc(r.pref)}</span>` : ''}
+        </div>
+
+        <!-- 3. 種別タグ -->
+        <div class="detail-tags-row">
+          ${r.type ? `<span class="detail-type-inline">${esc(r.type)}</span>` : ''}
+        </div>
+
+        <div class="detail-divider"></div>
+
+        <!-- 4. 飲んだ場所 -->
+        ${r.place ? `<div class="detail-place-block"><span class="detail-info-icon">📍</span><span class="detail-info-text">${esc(r.place)}</span></div>` : ''}
+
+        <!-- 5. 日付 + 記入者 -->
+        <div class="detail-info-row">
+          <div class="detail-place-block"><span class="detail-info-icon">📅</span><span class="detail-info-text">${r.date}</span></div>
+          ${r.writers && r.writers.length > 0 ? `<div class="detail-writers-inline"><span class="detail-info-icon">👤</span><span class="detail-info-text">${r.writers.map(w=>esc(w)).join('・')}</span></div>` : ''}
+        </div>
+
+        <div class="detail-divider"></div>
+
+        <!-- 6. 総合評価 -->
+        <div class="detail-rating-row">
+          <span class="detail-rating-stars">${tokkuriRating(r.rating)}</span>
+          <span class="detail-rating-num">${r.rating} <span style="font-size:12px;opacity:0.5;">/ 5</span></span>
+        </div>
+
+        <div class="detail-divider"></div>
+
+        <!-- 7. レーダーチャート -->
+        <div class="radar-wrap"><div class="radar-title">TASTE PROFILE</div>${drawRadar(r)}</div>
+
+        <!-- 8. メモ -->
+        ${r.memo ? `<div class="detail-divider"></div><div class="memo-section"><div class="memo-label">TASTING NOTE</div><div class="memo-text">${esc(r.memo)}</div></div>` : ''}
+
+        <!-- 9. ボタン -->
+        <div style="display:flex;gap:10px;margin-top:20px;">
+          <button class="edit-btn" onclick="showEditForm(${r.id})">編集する</button>
+          <button class="delete-btn" style="margin-top:0;flex:1;" onclick="deleteRecord(${r.id})">削除する</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderForm() {
+  document.getElementById('view-form').innerHTML = `
+    <div class="form-wrap">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <button class="back-btn" style="margin-bottom:0;" onclick="goBack()">${prevView === "form" ? "← 編集画面に戻る" : "← 戻る"}</button>
+      </div>
+      <div class="form-header">
+        <div class="form-title-en">${editingId ? "EDIT" : "NEW RECORD"}</div>
+        <div class="form-title-ja">${editingId ? "記録を編集する" : "新しい一本を記録する"}</div>
+      </div>
+      <div class="field"><label class="field-label">📷 写真</label>
+        <div id="photo-area">${photoData ? `<img class="photo-preview" src="${photoData}"><p style="font-size:11px;color:var(--gray);margin-top:8px;font-weight:500;text-align:center;cursor:pointer;letter-spacing:0.1em;" onclick="clearPhoto()">✕ 写真を削除</p>` : `<div class="photo-upload"><input type="file" accept="image/*" onchange="handlePhoto(event)"><div class="photo-upload-icon">📷</div><div class="photo-upload-text">ラベルの写真を追加</div></div>`}</div>
+      </div>
+      <div class="field"><label class="field-label">銘柄名 <span class="required-badge">必須</span></label><input type="text" id="f-name" placeholder="例：獺祭 純米大吟醸" value="${esc(form.name||'')}"></div>
+      <div class="field"><label class="field-label">蔵元（酒造）</label>
+        <div class="brewery-search-wrap">
+          <input type="text" id="f-brewery-search" placeholder="蔵元名で検索..." autocomplete="off"
+            oninput="onBreweryInput(this.value)"
+            value="${form.brewerySel ? form.brewerySel + (form.pref ? ' (' + form.pref + ')' : '') : ''}">
+          <div id="brewery-dropdown" class="brewery-dropdown" style="display:none"></div>
+        </div>
+        <input type="hidden" id="f-brewery" value="${esc(form.brewerySel)}">
+        <input type="hidden" id="f-pref" value="${esc(form.pref)}">
+      </div>
+      <div class="field">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <label class="field-label" style="margin-bottom:0;">記入者</label>
+          <button style="background:rgba(45,74,138,0.08);border:none;color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;padding:4px 10px;border-radius:20px;letter-spacing:0.05em;" onclick="showSettings()">＋ 追加</button>
+        </div>
+        <div class="member-select-row" id="member-select-row">
+          ${members.length === 0
+            ? '<p style="font-size:12px;color:var(--blue);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:3px;" onclick="showSettings()">＋ 設定から記入者を登録する</p>'
+            : members.map((m,i) => '<button class="member-select-btn' + ((form.writers||[]).includes(m) ? ' active' : '') + '" onclick="toggleWriter(' + i + ')">' + m + '</button>').join('')
+          }
+        </div>
+      </div>
+      <div class="field"><label class="field-label">種別</label><div class="type-grid" id="type-grid">${SAKE_TYPES.map(t=>`<button class="type-btn" data-type="${t}" onclick="setType('${t}')">${t}</button>`).join('')}</div></div>
+      <div class="field">
+        <label class="field-label">📅 飲んだ日 <span class="required-badge">必須</span></label>
+        <div style="position:relative;">
+          <input type="date" id="f-date" value="${form.date}" style="padding-left:16px;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:none;">
+          <div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:20px;pointer-events:none;">›</div>
+        </div>
+      </div>
+      <div class="field"><label class="field-label">総合評価 <span class="required-badge">必須</span></label>
+          <div class="scale-labels"><span>いまいち</span><span>最高！</span></div><div class="star-row" id="stars-rating">${[1,2,3,4,5].map(n=>`<button class="star-btn${n<=form.rating?' on':''}" onclick="setRating('rating',${n})">${tokkuriSVG(n<=form.rating)}</button>`).join('')}</div></div>
+      <div class="field"><label class="field-label">甘味</label>
+          <div class="scale-labels"><span>控えめ</span><span>甘い</span></div><div class="star-row" id="stars-sweetness">${[1,2,3,4,5].map(n=>`<button class="star-btn${n<=form.sweetness?' on':''}" onclick="setRating('sweetness',${n})">${tokkuriSVG(n<=form.sweetness)}</button>`).join('')}</div></div>
+      <div class="field"><label class="field-label">香り</label>
+          <div class="scale-labels"><span>穏やか</span><span>華やか</span></div><div class="star-row" id="stars-floral">${[1,2,3,4,5].map(n=>`<button class="star-btn${n<=form.floral?' on':''}" onclick="setRating('floral',${n})">${tokkuriSVG(n<=form.floral)}</button>`).join('')}</div></div>
+      <div class="field"><label class="field-label">キレ</label>
+          <div class="scale-labels"><span>余韻あり</span><span>キレよい</span></div><div class="star-row" id="stars-crisp">${[1,2,3,4,5].map(n=>`<button class="star-btn${n<=form.crisp?' on':''}" onclick="setRating('crisp',${n})">${tokkuriSVG(n<=form.crisp)}</button>`).join('')}</div></div>
+      <div class="field"><label class="field-label">芳醇さ</label>
+          <div class="scale-labels"><span>淡麗</span><span>濃醇</span></div><div class="star-row" id="stars-rich">${[1,2,3,4,5].map(n=>`<button class="star-btn${n<=form.rich?' on':''}" onclick="setRating('rich',${n})">${tokkuriSVG(n<=form.rich)}</button>`).join('')}</div></div>
+      <div class="field"><label class="field-label">酸味</label>
+          <div class="scale-labels"><span>まろやか</span><span>酸っぱい</span></div><div class="star-row" id="stars-acid">${[1,2,3,4,5].map(n=>`<button class="star-btn${n<=form.acid?' on':''}" onclick="setRating('acid',${n})">${tokkuriSVG(n<=form.acid)}</button>`).join('')}</div></div>
+      <div class="field"><label class="field-label">飲んだ場所</label><input type="text" id="f-place" placeholder="例：渋谷の居酒屋、自宅など" value="${esc(form.place||'')}"></div>
+      <div class="field"><label class="field-label">テイスティングノート</label><textarea id="f-memo" rows="3" placeholder="香り、味わい、合わせた料理など..."></textarea></div>
+
+```
+  <button class="submit-btn" id="submit-btn" onclick="editingId ? updateRecord() : addRecord()" disabled>${editingId ? "UPDATE" : "RECORD"}</button>
+</div>`;
+```
+
+updateTypeButtons();
+// 銘柄名の入力状態でボタン活性制御
+const nameInput = document.getElementById(‘f-name’);
+const submitBtn = document.getElementById(‘submit-btn’);
+function checkSubmit() {
+const val = (document.getElementById(‘f-name’)||{}).value||’’;
+const btn = document.getElementById(‘submit-btn’);
+if (btn) btn.disabled = !val.trim();
+}
+if (nameInput) {
+nameInput.addEventListener(‘input’, checkSubmit);
+checkSubmit();
+}
+if (submitBtn && editingId) submitBtn.disabled = false;
+}
+function showStampAnimation(name) {
+const overlay = document.createElement(‘div’);
+overlay.className = ‘stamp-overlay’;
+overlay.innerHTML = `<div class="stamp-anim"><div class="stamp-anim-text">KANPAI<br/>🍶</div><div class="stamp-anim-sub">${esc(name)}</div></div>`;
+document.body.appendChild(overlay);
+setTimeout(() => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 1800);
+}
+function handlePhoto(e) {
+const file = e.target.files[0]; if (!file) return;
+const reader = new FileReader();
+reader.onload = ev => {
+photoData = ev.target.result;
+const area = document.getElementById(‘photo-area’);
+if (area) area.innerHTML = `<img class="photo-preview" src="${photoData}"><p style="font-size:11px;color:var(--gray);margin-top:8px;font-weight:500;text-align:center;cursor:pointer;" onclick="clearPhoto()">✕ 写真を削除</p>`;
+};
+reader.readAsDataURL(file);
+}
+function clearPhoto() {
+photoData = null;
+const area = document.getElementById(‘photo-area’);
+if (area) area.innerHTML = `<div class="photo-upload"><input type="file" accept="image/*" onchange="handlePhoto(event)"><div class="photo-upload-icon">📷</div><div class="photo-upload-text">ラベルの写真を追加</div></div>`;
+}
+function updateStars(key) {
+const el = document.getElementById(‘stars-’+key); if (!el) return;
+el.querySelectorAll(’.star-btn’).forEach((btn,i) => {
+const filled = i < form[key];
+btn.classList.toggle(‘on’, filled);
+btn.innerHTML = tokkuriSVG(filled);
+});
+}
+function updateTypeButtons() {
+const grid = document.getElementById(‘type-grid’); if (!grid) return;
+grid.querySelectorAll(’.type-btn’).forEach(btn => btn.classList.toggle(‘active’, btn.dataset.type===form.type));
+}
+
+function showSettings() { prevView = currentView; currentView=‘settings’; render(); }
+
+function renderSettings() {
+document.getElementById(‘view-settings’).innerHTML = `<div class="settings-wrap"> <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;"> <button class="back-btn" style="margin-bottom:0;" onclick="goBack()">${prevView === "form" ? "← 編集画面に戻る" : "← 戻る"}</button> </div> <div class="form-header"> <div class="form-title-en">SETTINGS</div> <div class="form-title-ja">設定</div> </div> <div class="settings-section"> <div class="settings-title">記入者の管理</div> <div class="member-list" id="member-list"> ${members.length === 0 ? '<p style="font-size:12px;color:var(--gray);padding:8px 0;">まだ登録されていません</p>' : members.map((m,i) =>`<div class="member-item"><span class="member-name">${esc(m)}</span><button class="member-delete" onclick="deleteMember(${i})">×</button></div>`).join('') } </div> <div class="member-add-row"> <input class="member-add-input" type="text" id="new-member-input" placeholder="名前を入力..."> <button class="member-add-btn" onclick="addMember()">追加</button> </div> </div> </div>`;
+}
+
+function addMember() {
+const input = document.getElementById(‘new-member-input’);
+if (!input) return;
+const name = input.value.trim();
+if (!name) return;
+if (members.includes(name)) { showSnackbar(‘同じ名前が既に登録されています’); return; }
+members = […members, name];
+saveMembers(members);
+renderSettings();
+showSnackbar(‘✓ ’ + name + ’ を追加しました’);
+}
+
+function deleteMember(idx) {
+members = members.filter((_,i) => i !== idx);
+saveMembers(members);
+renderSettings();
+showSnackbar(‘削除しました’);
+}
+
+function toggleWriter(idx) {
+if (!Array.isArray(form.writers)) form.writers = [];
+const name = members[idx];
+if (!name) return;
+const i = form.writers.indexOf(name);
+if (i >= 0) { form.writers.splice(i, 1); }
+else { form.writers.push(name); }
+// ボタンのactive状態を更新
+const row = document.getElementById(‘member-select-row’);
+if (!row) return;
+row.querySelectorAll(’.member-select-btn’).forEach((btn, bi) => {
+btn.classList.toggle(‘active’, form.writers.includes(members[bi]));
+});
+}
+
+function onBreweryInput(val) {
+const dropdown = document.getElementById(‘brewery-dropdown’);
+if (!dropdown) return;
+if (!val || val.length < 1) { dropdown.style.display = ‘none’; return; }
+const q = val.trim();
+const results = BREWERIES.filter(b => b.name.includes(q) || b.pref.includes(q)).slice(0, 20);
+if (results.length === 0) { dropdown.style.display = ‘none’; return; }
+dropdown.innerHTML = results.map(b =>
+`<div class="brewery-option" onclick="selectBrewery('${b.name.replace(/'/g,"\\'")}','${b.pref}')"> <span class="brewery-option-name">${esc(b.name)}</span> <span class="brewery-option-pref">${esc(b.pref)}</span> </div>`
+).join(’’);
+dropdown.style.display = ‘block’;
+}
+
+function selectBrewery(name, pref) {
+form.brewerySel = name;
+form.pref = pref;
+const searchInput = document.getElementById(‘f-brewery-search’);
+const hiddenBrewery = document.getElementById(‘f-brewery’);
+const hiddenPref = document.getElementById(‘f-pref’);
+const dropdown = document.getElementById(‘brewery-dropdown’);
+if (searchInput) searchInput.value = name + ’ (’ + pref + ‘)’;
+if (hiddenBrewery) hiddenBrewery.value = name;
+if (hiddenPref) hiddenPref.value = pref;
+if (dropdown) dropdown.style.display = ‘none’;
+}
+
+function showEditForm(id) {
+const r = records.find(r => r.id === id);
+if (!r) return;
+// 編集対象をformにセット
+form = {
+name: r.name||’’, brewery: r.brewery||’’, brewerySel: r.brewery||’’,
+pref: r.pref||’’, type: r.type||’’, date: r.date||today(),
+sweetness: r.sweetness||3, floral: r.floral||3, crisp: r.crisp||3,
+rich: r.rich||3, acid: r.acid||3, rating: r.rating||3,
+memo: r.memo||’’, photo: r.photo||’’, writers: r.writers||[],
+place: r.place||’’
+};
+photoData = r.photo||null;
+editingId = id;
+currentView = ‘form’;
+render();
+}
+
+function updateRecord() {
+const name=(document.getElementById(‘f-name’)||{}).value||’’;
+const brewery=(document.getElementById(‘f-brewery’)||{}).value||form.brewerySel||’’;
+const pref=(document.getElementById(‘f-pref’)||{}).value||form.pref||’’;
+const date=(document.getElementById(‘f-date’)||{}).value||form.date;
+const memo=(document.getElementById(‘f-memo’)||{}).value||’’;
+const place=((document.getElementById(‘f-place’)||{}).value||’’).trim();
+if (!name.trim()) { alert(‘銘柄名を入力してください’); return; }
+records = records.map(r => r.id === editingId ? {
+…r, name:name.trim(), brewery:brewery.trim(), pref:pref.trim(),
+type:form.type, date, sweetness:form.sweetness, floral:form.floral,
+crisp:form.crisp, rich:form.rich, acid:form.acid, rating:form.rating,
+memo:memo.trim(), photo:photoData||r.photo||’’,
+writers:form.writers||[], place
+} : r);
+saveRecords(records);
+editingId = null;
+selectedId = records.find(r => r.name === name.trim())?.id || selectedId;
+currentView = ‘detail’;
+render();
+showSnackbar(“✓ 更新しました”);
+}
+
+function showSnackbar(msg) {
+// DOMが再構築された後でも確実に表示されるよう遅延実行
+setTimeout(() => {
+let sb = document.getElementById(‘snackbar’);
+if (!sb) {
+sb = document.createElement(‘div’);
+sb.id = ‘snackbar’;
+sb.className = ‘snackbar’;
+document.body.appendChild(sb);
+}
+sb.textContent = msg || ‘✓ 保存しました’;
+sb.classList.add(‘show’);
+setTimeout(() => sb.classList.remove(‘show’), 2200);
+}, 50);
+}
+
+function goBack() {
+if (prevView === ‘form’) { currentView = ‘form’; prevView = null; render(); }
+else if (prevView === ‘detail’) { currentView = ‘detail’; prevView = null; render(); }
+else { showMain(); }
+}
+function showMain() { currentView=‘main’; render(); }
+function showDetail(id) { selectedId=id; currentView=‘detail’; render(); }
+function showForm() { form=freshForm(); photoData=null; editingId=null; currentView=‘form’; render(); }
+function setType(t) { form.type=t; updateTypeButtons(); }
+function setRating(key,n) { form[key]=n; updateStars(key); }
+function addRecord() {
+const name=(document.getElementById(‘f-name’)||{}).value||’’;
+const brewery=(document.getElementById(‘f-brewery’)||{}).value||form.brewerySel||’’;
+const pref=(document.getElementById(‘f-pref’)||{}).value||form.pref||’’;
+const date=(document.getElementById(‘f-date’)||{}).value||form.date;
+const memo=(document.getElementById(‘f-memo’)||{}).value||’’;
+if (!name.trim()) { alert(‘銘柄名を入力してください’); return; }
+records=[{id:Date.now(),name:name.trim(),brewery:brewery.trim(),pref:pref.trim(),type:form.type,date,sweetness:form.sweetness,floral:form.floral,crisp:form.crisp,rich:form.rich,acid:form.acid,rating:form.rating,memo:memo.trim(),photo:photoData||’’,writers:form.writers||[],place:((document.getElementById(‘f-place’)||{}).value||’’).trim()},…records];
+saveRecords(records);
+showMain();
+showStampAnimation(name.trim());
+setTimeout(() => showSnackbar(“✓ 記録しました”), 400);
+}
+function deleteRecord(id) {
+if (!confirm(‘この記録を削除しますか？’)) return;
+records=records.filter(r=>r.id!==id);
+saveRecords(records);
+showMain();
+}
+render();
+</script>
+
+<div class="snackbar" id="snackbar"></div>
+</body>
+</html>
